@@ -1,23 +1,40 @@
 # Relatório — <seu nome> (<sua matrícula>)
 
-Relatório do projeto, preenchido na sua branch. Cada marco acrescenta a sua seção. Responda com as suas palavras e com
-os números da sua execução; cada resposta cabe em até 6 linhas, além das tabelas.
+<!--Relatório do projeto, preenchido na sua branch. Cada marco acrescenta a sua seção. Responda com as suas palavras e com
+os números da sua execução; cada resposta cabe em até 6 linhas, além das tabelas.-->
 
 ## Marco 1
 
 ### Ambiente
 
+- Saída de "which python":
+```bash
+/home/al.felipe.santor/venvs/prog2-venv/bin/python`
+```
+- Etapa 0 do marco1.py:
+```bash 
+=== Etapa 0: ambiente ===
+Python 3.13.15 | NumPy 2.5.4 | fornecido 2.0
+```
+
 <!-- Cole aqui a saída de `which python` e da Etapa 0 do `python marco1.py`. -->
 
 ### R1 — Expressões regulares
+
+- Exemplo que "re.match" aceita e "re.fullmatch" não aceita:
+`AB123 coisa`
+
+Isso implica que a função "valida_tag" irá apenas aceitar tags que cumprirem com os requisitos e não se extenderem para além do tamanho requisitado.
 
 <!-- Uma string que re.match aceita e re.fullmatch rejeita com o padrão de tag; consequência para valida_tag. -->
 
 ### R2 — Linhas inválidas
 
+"ler_log" deve devolver as linhas descartadas pois é uma boa prática mostrar ao usuário a razão do erro, ou ao menos, o que resultou em erro. Por exemplo, se uma tag for lançada de maneira incorreta, e não soubermos qual foi, precisariamos analisar todas as tags e fazer uma verificação manual em cada uma para poder corrigir o erro.
 <!-- Por que ler_log devolve as linhas descartadas; uma situação real em que descartar em silêncio esconderia um problema. -->
 
 ### R3 — Late binding
+
 
 <!-- Por que errados["PT102"](4095) dá 409,5 e por que a sua criar_conversores não tem o problema. -->
 
