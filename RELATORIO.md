@@ -30,12 +30,12 @@ Isso implica que a função "valida_tag" irá apenas aceitar tags que cumprirem 
 
 ### R2 — Linhas inválidas
 
-"ler_log" deve devolver as linhas descartadas pois é uma boa prática mostrar ao usuário a razão do erro, ou ao menos, o que resultou em erro. Por exemplo, se uma tag for lançada de maneira incorreta, e não soubermos qual foi, precisariamos analisar todas as tags e fazer uma verificação manual em cada uma para poder corrigir o erro.
+"ler_log" deve devolver as linhas descartadas pois é uma boa prática mostrar ao usuário a razão do erro, ou ao menos, o que resultou em erro. Por exemplo, se uma tag for lançada de maneira incorreta, e não soubermos qual tag foi, precisariamos analisar todas as tags e fazer uma verificação manual em cada uma para poder corrigir o erro.
 <!-- Por que ler_log devolve as linhas descartadas; uma situação real em que descartar em silêncio esconderia um problema. -->
 
 ### R3 — Late binding
 
-
+"errados["PT102"](4095)" tenta converter as contagens em kPa, porém, devido ao Late Binding, este guarda uma função lambda c: c * k, com $k = 0.1$, ao invés de $k = 600/4095$, pois k recebe o valor 0.1 em sua última atribuição de "escalas". Já em "criar_conversores", consertamos esse erro ao criar uma variável auxiliar e determinar o valor do parâmetro da função lambda igual à essa variável (como default value), ao invés de passar essa variável diretamente como parâmetro, lambda c, f=fator: c * f [...], assim evitando o Late Binding. 
 <!-- Por que errados["PT102"](4095) dá 409,5 e por que a sua criar_conversores não tem o problema. -->
 
 ### R4 — Escala nominal

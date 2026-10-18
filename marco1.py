@@ -43,13 +43,23 @@ def etapa1(texto: str, verdade: dict) -> list:
     assert len(registros) + len(invalidas) == verdade["linhas"]
     assert contagem_por_tag(registros) == verdade["registros_por_tag"]
 
+    print(f"Registros válidos: {len(registros)} | Linhas inválidas: {len(invalidas)}")
+
     # (b) Conte os registros por nível com uma compreensão de dicionário.
-    por_nivel = _todo("1(b)")
+    por_nivel = {nivel: sum(1 for r in registros if r.nivel == nivel) for nivel in {r.nivel for r in registros}}
     assert por_nivel == verdade["por_nivel"]
 
+    print("Registros por nível:")
+    for nivel, contagem in por_nivel.items():
+        print(f"  {nivel}: {contagem}")
+
     # (c) Some os pulsos de FT201 (com `serie`) e imprima o volume bombeado na hora (0,1 L/pulso).
-    total = _todo("1(c)")
+    total = serie(registros, "FT201", "pulsos").sum()
+    total_em_litros = total * 0.1
     assert total == verdade["pulsos_total"]
+
+    print(f"Volume bombeado na hora: {total_em_litros:.1f} L")
+    
 
     # (d) valida_tag.
     for tag in ["PT101", "FT201", "B1"]:
@@ -63,25 +73,25 @@ def etapa2(texto: str, registros: list, verdade: dict) -> None:
     """Etapa 2 — Lambda e compreensões (issue #2)."""
     print("\n=== Etapa 2: lambda e compreensões ===")
     # (a) Ordene com sorted e key=lambda: (i) por (tag, instante); (ii) por instante decrescente.
-    por_tag_instante = _todo("2(a)(i)")
-    decrescente = _todo("2(a)(ii)")
+    por_tag_instante = sorted(registros, key=lambda r: (r.tag, r.instante)) 
+    decrescente = sorted(registros, key=lambda r: r.instante, reverse=True) 
     assert por_tag_instante[0].tag == "B1"
     assert decrescente[0].instante == max(r.instante for r in registros)
 
     # (b) Contagens de PT102 (só registros com a chave "contagens"): map/filter e compreensão.
-    com_map = _todo("2(b) map/filter")
-    com_compreensao = _todo("2(b) compreensão")
+    com_map = list(map(lambda r: r.valores["contagens"], filter(lambda r: r.tag == "PT102" and "contagens" in r.valores, registros)))
+    com_compreensao = [r.valores["contagens"] for r in registros if r.tag == "PT102" and "contagens" in r.valores]
     assert com_map == com_compreensao and len(com_compreensao) == 600
 
     # (c) Contagens acima de 2000 (compreensão de lista) e tags distintas (de conjunto).
-    altas = _todo("2(c) altas")
-    tags = _todo("2(c) tags")
+    altas = [r.valores["contagens"] for r in registros if "contagens" in r.valores and r.valores["contagens"] > 2000] #tivemos que garantir que "contagens" estava presente, para garantir que não iria dar erro
+    tags = {r.tag for r in registros}    
     assert len(altas) == 5
     assert tags == {"B1", "PT101", "PT102", "FT201", "LT301"}
 
     # (d) Com re.sub e uma lambda como repl, troque pulsos=N por volume_L=V (V = N * 0,1,
     #     com uma casa decimal; por exemplo, pulsos=3892 vira volume_L=389.2).
-    convertido = _todo("2(d)")
+    convertido = re.sub(r"pulsos=(\d+)", lambda m: f"volume_L={float(m.group(1)) * 0.1:.1f}", texto)
     assert convertido.count("volume_L=") == 600 and "pulsos=" not in convertido
 
     # (e) Late binding: a versão errada (não corrija esta linha) e a sua.
@@ -93,9 +103,10 @@ def etapa2(texto: str, registros: list, verdade: dict) -> None:
 
     # (f) Converta a média das contagens normais de PT102 (até 2000) com a escala nominal
     #     (certos["PT102"]) e imprima ao lado de verdade["pressao_recalque"].
-    p_nominal = _todo("2(f)")
+    p_nominal = certos["PT102"](np.mean([r.valores["contagens"] for r in registros if r.tag == "PT102" and "contagens" in r.valores and r.valores["contagens"] <= 2000]))
     assert abs(p_nominal - verdade["pressao_recalque"]) > 100
 
+    print(f"Pressão de recalque nominal: {p_nominal:.1f} kPa | verdade: {verdade['pressao_recalque']:.1f} kPa")
 
 def etapa3() -> None:
     """Etapa 3 — Memória e tempo (issue #3). Registre as previsões ANTES de rodar."""
@@ -103,23 +114,45 @@ def etapa3() -> None:
     n = 1_000_000
     contagens = np.random.default_rng(1).integers(0, 4096, n)
 
+    # criação de tabelas
+    formato_4 = "{:<10} | {:^14} | {:<12} | {:^10}"
+    formato_3 = "{:<12} | {:^16} | {:<12}"
+
     # (a) Memória: imprima uma tabela com estrutura, bytes por elemento, bytes totais e a
     #     razão em relação à lista.
     memoria = medir_memoria(contagens)
-    _todo("3(a) tabela")
+    print(formato_4.format("Estrutura", "Bytes/elemento", "Bytes totais", "Razão/lista"))
+    print("-" * 60)
+    for estrutura, bytes_totais in memoria.items():
+        if estrutura == "list":
+            continue
+        razao = bytes_totais / memoria["list"]
+        print(formato_4.format(estrutura, bytes_totais // n, bytes_totais, f"{razao:.1f}"))
+
     assert memoria["uint16"] == 2_000_000
     assert memoria["list"] > 10 * memoria["uint16"]
 
+    print("=" * 60)
     # (b) Tempo: imprima uma tabela com o tempo (ms) e a aceleração em relação ao laço.
     tempos = medir_tempos(contagens, k=10)
-    _todo("3(b) tabela")
+    print(formato_3.format("Versão", "Tempo médio (ms)", "Aceleração"))
+    print("-" * 60)
+    for versao, tempo in tempos.items():
+        if versao == "laço":
+            continue
+        aceleracao = tempos["laço"] / tempo
+        print(formato_3.format(versao, f"{tempo * 1000:.3f}", f"{aceleracao:.1f}"))
+
     assert tempos["laço"] / tempos["vetorizado"] >= 5
 
+    print("=" * 60)
     # (c) Tipos e overflow: imprima os dois resultados.
     misto = np.array([1, 2.5, "a"])
     estouro = np.array([4095], dtype=np.uint16) * 20
     assert misto.dtype.kind == "U"
     assert estouro[0] == 16364 and 4095 * 20 == 81900
+
+    print(f"Tipo do array misto: {misto.dtype} | Valor do estouro: {estouro[0]}")
 
 
 def etapa4(registros: list) -> None:

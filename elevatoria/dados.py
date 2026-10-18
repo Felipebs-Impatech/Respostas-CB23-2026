@@ -29,7 +29,20 @@ from fornecido.cronometro import cronometrar
 #: dígitos) e `resto` (o restante da linha, começando por um caractere que não é espaço).
 #: As partes são separadas por um ou mais espaços. A linha inteira deve casar: o padrão é
 #: aplicado com `LINHA.fullmatch(linha)`.
-LINHA: re.Pattern = re.compile(r'^(?P<data>\d{4}-\d{2}-\d{2}) (?P<hora>\d{2}:\d{2}:\d{2}) (?P<nivel>INFO|WARN|ALARME) (?P<tag>[A-Z]{1,2}\d{1,3}) (?P<resto>.+)$', re.VERBOSE) 
+LINHA: re.Pattern = re.compile(
+    r"""
+    (?P<data>\d{4}-\d{2}-\d{2})
+    \s+
+    (?P<hora>\d{2}:\d{2}:\d{2})
+    \s+
+    (?P<nivel>INFO|WARN|ALARME)
+    \s+
+    (?P<tag>[A-Z]{1,2}\d{1,3})
+    \s+
+    (?P<resto>\S.*)
+    """,
+    re.VERBOSE,
+)
 
 
 @dataclass(frozen=True)
@@ -144,7 +157,9 @@ def criar_conversores(escalas: dict[str, float]) -> dict[str, Callable[[float], 
     Cada `f` é uma lambda. Cuidado com o *late binding*: cada função deve usar o fator da
     sua tag, e não o último fator do dicionário (veja a issue #2 no enunciado).
     """
-    return {tag: lambda c, f=fator: c * f for tag, fator in escalas.items()}
+    # late binding resolvido com argumento default na lambda: f=fator
+    return {tag: lambda c, f=fator: c * f for tag, fator in escalas.items()} 
+
 
 
 # ---------------------------------------------------------------------------------------
@@ -166,12 +181,16 @@ def medir_memoria(contagens: np.ndarray) -> dict[str, int]:
     if not isinstance(contagens, np.ndarray):
         raise ValueError("contagens deve ser um ndarray")
 
-    if contagens.ndim != 1 or contagens.dtype.kind != "i":
+    if contagens.ndim != 1 or contagens.dtype.kind not in "iu":
         raise ValueError("contagens deve ser um ndarray 1D de inteiros")
 
+    # Cria as estruturas e calcula os tamanhos para evitarmos erros desnecessários
+    lista = contagens.tolist()
+    array_h = array.array("H", contagens)
+
     return {
-        "list": sys.getsizeof(contagens.tolist()) + sum(sys.getsizeof(x) for x in contagens.tolist()),
-        "array('H')": contagens.itemsize * len(contagens),
+        "list": sys.getsizeof(lista) + sum(sys.getsizeof(x) for x in lista),
+        "array('H')": array_h.itemsize * len(array_h),
         "uint16": np.array(contagens, dtype=np.uint16).nbytes,
         "int32": np.array(contagens, dtype=np.int32).nbytes,
         "int64": np.array(contagens, dtype=np.int64).nbytes,
@@ -182,23 +201,22 @@ def medir_memoria(contagens: np.ndarray) -> dict[str, int]:
 
 def converter_laco(contagens: list[int]) -> list[float]:
     """Converte contagens em kPa (`c * 600 / 4095`) com `for` e `append`."""
-    raise NotImplementedError("issue #3: converter_laco")
-
+    resultado = []
+    for c in contagens:
+        resultado.append(c * 600 / 4095)
+    return resultado
 
 def converter_compreensao(contagens: list[int]) -> list[float]:
     """Converte contagens em kPa (`c * 600 / 4095`) com uma compreensão de lista."""
-    raise NotImplementedError("issue #3: converter_compreensao")
-
+    return [c * 600 / 4095 for c in contagens]
 
 def converter_map(contagens: list[int]) -> list[float]:
     """Converte contagens em kPa (`c * 600 / 4095`) com `map` e uma lambda."""
-    raise NotImplementedError("issue #3: converter_map")
-
+    return list(map(lambda c: c * 600 / 4095, contagens))
 
 def converter_vetorizado(contagens: np.ndarray) -> np.ndarray:
     """Converte contagens em kPa (`c * 600 / 4095`) com uma operação vetorizada do NumPy."""
-    raise NotImplementedError("issue #3: converter_vetorizado")
-
+    return contagens * 600 / 4095
 
 def medir_tempos(contagens: np.ndarray, k: int = 10) -> dict[str, float]:
     """Tempo médio (s) de cada versão da conversão, em `k` repetições.
@@ -207,4 +225,14 @@ def medir_tempos(contagens: np.ndarray, k: int = 10) -> dict[str, float]:
     `"map+lambda"` (que recebem a lista `contagens.tolist()`, criada uma única vez, fora da
     medição) e `"vetorizado"` (que recebe o próprio `ndarray`).
     """
-    raise NotImplementedError("issue #3: medir_tempos")
+    tempo_compressao = cronometrar(converter_compreensao, contagens.tolist(), k=k)
+    tempo_map = cronometrar(converter_map, contagens.tolist(), k=k)
+    tempo_laco = cronometrar(converter_laco, contagens.tolist(), k=k)
+    tempo_vetorizado = cronometrar(converter_vetorizado, contagens, k=k)
+
+    return {
+        "laço": tempo_laco,
+        "compreensão": tempo_compressao,
+        "map+lambda": tempo_map,
+        "vetorizado": tempo_vetorizado
+    }
