@@ -35,11 +35,21 @@ Isso implica que a função "valida_tag" irá apenas aceitar tags que cumprirem 
 
 ### R3 — Late binding
 
-"errados["PT102"](4095)" tenta converter as contagens em kPa, porém, devido ao Late Binding, este guarda uma função lambda c: c * k, com $k = 0.1$, ao invés de $k = 600/4095$, pois k recebe o valor 0.1 em sua última atribuição de "escalas". Já em "criar_conversores", consertamos esse erro ao criar uma variável auxiliar e determinar o valor do parâmetro da função lambda igual à essa variável (como default value), ao invés de passar essa variável diretamente como parâmetro, lambda c, f=fator: c * f [...], assim evitando o Late Binding. 
+"errados\["PT102"](4095)" tenta converter as contagens em kPa, porém, devido ao Late Binding, este guarda uma função lambda c: c * k, com k = 0.1, ao invés de k = 600/4095, pois k recebe o valor 0.1 em sua última atribuição de "escalas". Já em "criar_conversores", consertamos esse erro ao criar uma variável auxiliar e determinar o valor do parâmetro da função lambda igual à essa variável (como default value), ao invés de passar essa variável diretamente como parâmetro, lambda c, f=fator: c * f [...], assim evitando o Late Binding. 
 <!-- Por que errados["PT102"](4095) dá 409,5 e por que a sua criar_conversores não tem o problema. -->
 
 ### R4 — Escala nominal
 
+A diferença é esperada pelo assert: o item 2(f) usa uma conversão linear nominal para calcular a pressão, enquanto o simulador gera as contagens com um modelo não linear.
+
+Em marco1.py, o fator de PT102 é 600 / 4095. Aplicado à média das contagens normais, ele dá cerca de 261,9 kPa. O valor de referência é 380 kPa, então a diferença é de aproximadamente 118,1 kPa — e por isso abs(p_nominal - verdade["pressao_recalque"]) > 100 passa.
+
+Em simulador.py temos as seguintes funções com as suas respectivas funcionalidades:
+- `p_real` calcula a pressão com uma função seno.
+- `c_real` calcula a operação inversa para gerar contagens a partir da pressão de referência.
+- `gerar_log` usa esse modelo para gerar as leituras de PT102 e acrescenta cinco leituras falsas; a condição <= 2000 em marco1.py as exclui da média.
+
+Com a minha matrícula, a média das contagens normais é aproximadamente 1787,8. Pelo modelo real, isso corresponde a cerca de 380 kPa; pela escala linear simplificada, dá aproximadamente 261,9 kPa. A comparação mostra que a escala nominal não representa a curva real do transmissor nessa faixa.
 <!-- Hipótese para a diferença da Etapa 2(f) e onde, no código da base, está a explicação. -->
 
 ### R5 — Previsão × medição (Etapa 3)
