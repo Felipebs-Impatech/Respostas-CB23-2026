@@ -64,6 +64,42 @@ class TestSerieTemporal(unittest.TestCase):
         esperado = SerieTemporal.de_lista([2.0, 5.0])
         resultado = s.reamostrar(3)
         self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
+class TestLerLog(unittest.TestCase):
+    """Testes de regressão da issue #1."""
+
+    def test_rejeita_data_e_hora_impossiveis(self):
+        """Linhas com data ou hora impossíveis são inválidas e preservadas."""
+        texto = (
+            "2026-13-05 08:00:00 INFO PT101 contagens=12\n"
+            "2026-10-05 25:00:00 INFO PT101 contagens=13\n"
+            "2026-10-05 08:00:00 INFO PT101 contagens=14\n"
+        )
+
+        registros, invalidas = ler_log(texto)
+
+        self.assertEqual(len(registros), 1)
+        self.assertEqual(registros[0].valores, {"contagens": 14.0})
+        self.assertEqual(invalidas, [
+            "2026-13-05 08:00:00 INFO PT101 contagens=12",
+            "2026-10-05 25:00:00 INFO PT101 contagens=13",
+        ])
+
+    def test_rejeita_linhas_sem_pares(self):
+        """Linhas sem pares chave=valor são inválidas e preservadas."""
+        texto = (
+            "2026-10-05 08:00:00 INFO PT101 contagens=12\n"
+            "2026-10-05 08:00:01 INFO PT101\n"
+            "2026-10-05 08:00:02 INFO PT101 evento=partida\n"
+        )
+
+        registros, invalidas = ler_log(texto)
+
+        self.assertEqual(len(registros), 2)
+        self.assertEqual(registros[0].valores, {"contagens": 12.0})
+        self.assertEqual(registros[1].valores, {"evento": "partida"})
+        self.assertEqual(invalidas, ["2026-10-05 08:00:01 INFO PT101"])
+    
+
 
 if __name__ == "__main__":
     unittest.main()
