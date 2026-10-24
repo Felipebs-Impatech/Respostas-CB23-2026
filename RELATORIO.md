@@ -54,7 +54,7 @@ Com a minha matrícula, a média das contagens normais é aproximadamente 1787,8
 
 ### R5 — Previsão × medição (Etapa 3)
 
-Previsões registradas no commit: <!-- cole o hash curto do commit de previsões -->
+Previsões registradas no commit: 909ed5f <!-- cole o hash curto do commit de previsões -->
 
 | Grandeza | Previsão | Medido |
 | --- | --- | --- |
@@ -68,11 +68,13 @@ Previsões registradas no commit: <!-- cole o hash curto do commit de previsões
 
 | Expressão | Tipo previsto | Tipo observado |
 | --- | --- | --- |
-| `s + s`   |SerieTemporal| | 
-| `s[1:]`   |float        | |
-| `s * 2`   |SerieTemporal| |
-| `s.sum()` |float        | |
-| `s[0]`    |float        | |
+| `s + s`   |SerieTemporal  |SerieTemporal| 
+| `s[1:]`   |float          |SerieTemporal|
+| `s * 2`   |SerieTemporal  |SerieTemporal|
+| `s.sum()` |float          |SerieTemporal|
+| `s[0]`    |float          |float64      |
+
+Fique surpreso que previ três floats, mas só veio um. O resultado que mais me supreende é como s.sum() retorna uma SerieTemporal. Pensava que estariamos somando os floats contidos em uma SerieTemporal, e portanto iriamos receber um float em retorno. Vou ter que dar uma olhada nessa função.
 
 <!-- Explique o resultado que mais surpreendeu você. -->
 

@@ -183,7 +183,12 @@ def etapa4(registros: list) -> None:
     assert math.isclose(float(por_minuto.mean()), float(s.mean()))
 
     # (d) Imprima o tipo (type(...).__name__) de s + s, s[1:], s * 2, s.sum() e s[0].
-    _todo("4(d)")
+    print("-" * 60)
+    print(f"Tipo de s + s: {type(s + s).__name__}")
+    print(f"Tipo de s[1:]: {type(s[1:]).__name__}")
+    print(f"Tipo de s * 2: {type(s * 2).__name__}")
+    print(f"Tipo de s.sum(): {type(s.sum()).__name__}")
+    print(f"Tipo de s[0]: {type(s[0]).__name__}")
 
 
 def main(matricula: int = MATRICULA) -> None:
