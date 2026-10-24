@@ -68,14 +68,25 @@ Previsões registradas no commit: <!-- cole o hash curto do commit de previsões
 
 | Expressão | Tipo previsto | Tipo observado |
 | --- | --- | --- |
-| `s + s` | | |
-| `s[1:]` | | |
-| `s * 2` | | |
+| `s + s`   | | |
+| `s[1:]`   | | |
+| `s * 2`   | | |
 | `s.sum()` | | |
-| `s[0]` | | |
+| `s[0]`    | | |
 
 <!-- Explique o resultado que mais surpreendeu você. -->
 
 ### R7 — Issue #4
+
+**Sintoma:**
+Função `media_movel` em `elevatoria\serie.py` estava retornando um dado a menos do que deveria, de acordo com docstring. Mas apesar disso, passsava nos testes de aceitação. 
+**Causa:**
+Havia um deslocamento de índice em `np.cumsum`, por isso, a função não estava considerando a primeira janela.
+**Correção:**
+Adicionamos um zero no início da variável `acumulada`, para evitar esse deslocamento de índice. Além disso, tive que garantir que a função retornava uma `SerieTemporal`, pois sem essa parte, não passava nos testes.
+**Por que os testes não pegaram o defeito antes?**
+Isso aconteceu porque o teste não verifica se os valores estão certos, nem se a quatidade de valores está certa, apenas verifica se janelas inválidas realmente estão sendo tratadas como inválidas, levantando `ValueError`, e se o tipo que a função retorna está correto (ou seja, retorna uma `SerieTemporal`)
+**Testes que implementei:**
+Os testes que implementei em `testes\test_dados.py` cobrem tanto o tamanho da janela quanto os valores que a função retorna, assim garantindo o bom funcionamento da função.
 
 <!-- Sintoma; o teste de regressão (nome); a causa, em termos da soma acumulada; a correção; por que os testes de aceitação não pegaram o defeito; mais um caso que eles não cobrem e qual teste seu o cobre. -->
