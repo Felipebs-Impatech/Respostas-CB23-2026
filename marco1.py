@@ -115,20 +115,20 @@ def etapa3() -> None:
     contagens = np.random.default_rng(1).integers(0, 4096, n)
 
     # criação de tabelas
-    formato_4 = "{:<10} | {:^14} | {:<12} | {:^10}"
-    formato_3 = "{:<12} | {:^16} | {:<12}"
+    formato_14 = "{:<10} | {:^14} | {:<12} | {:^10}"
+    formato_13 = "{:<12} | {:^16} | {:<12}"
 
     # (a) Memória: imprima uma tabela com estrutura, bytes por elemento, bytes totais e a
     #     razão em relação à lista.
     memoria = medir_memoria(contagens)
-    print(formato_4.format("Estrutura", "Bytes/elemento", "Bytes totais", "Razão/lista"))
+    print(formato_14.format("Estrutura", "Bytes/elemento", "Bytes totais", "Razão/lista"))
     print("-" * 60)
     for estrutura, bytes_totais in memoria.items():
         if estrutura == "list":
             razao = 1.0
         else:
             razao = bytes_totais / memoria["list"]
-            print(formato_4.format(estrutura, bytes_totais // n, bytes_totais, f"{razao:.3f}"))
+            print(formato_14.format(estrutura, bytes_totais // n, bytes_totais, f"{razao:.3f}"))
 
     assert memoria["uint16"] == 2_000_000
     assert memoria["list"] > 10 * memoria["uint16"]
@@ -136,14 +136,14 @@ def etapa3() -> None:
     print("=" * 60)
     # (b) Tempo: imprima uma tabela com o tempo (ms) e a aceleração em relação ao laço.
     tempos = medir_tempos(contagens, k=10)
-    print(formato_3.format("Versão", "Tempo médio (ms)", "Aceleração"))
+    print(formato_13.format("Versão", "Tempo médio (ms)", "Aceleração"))
     print("-" * 60)
     for versao, tempo in tempos.items():
         if versao == "laço":
             aceleracao = 1.0
         else:
             aceleracao = tempos["laço"] / tempo
-            print(formato_3.format(versao, f"{tempo * 1000:.3f}", f"{aceleracao:.1f}"))
+            print(formato_13.format(versao, f"{tempo * 1000:.3f}", f"{aceleracao:.1f}"))
 
     assert tempos["laço"] / tempos["vetorizado"] >= 5
 
@@ -162,13 +162,20 @@ def etapa4(registros: list) -> None:
     print("\n=== Etapa 4: a série de pressão ===")
     s = serie(registros, "PT102", "contagens")
 
+    # formatação das informações de estatística
+    formato_23 = "{:<10} | {:^10} | {:<10}"
+    formato_24 = "{:<16} | {:^10} | {:^10} | {:<10}"
+
     # (a) Imprima a média, o desvio (ddof=1) e a amplitude.
     assert len(s) == 600 and s.amplitude() > 300
+    print(formato_23.format(f"Média {s.mean():.1f}", f"Desvio {s.std(ddof=1):.1f}", f"Amplitude {s.amplitude():.1f}"))
 
-    # (b) Média móvel de 30 pontos: imprima o tamanho e os valores mínimo e máximo, ao lado
-    #     dos mínimo e máximo da série.
+    # (b) Média móvel de 30 pontos: imprima o tamanho e os valores mínimo e máximo, ao lado dos mínimo e máximo da série.
     mm = s.media_movel(30)
     assert len(mm) == 571
+    print("-" * 60)
+    print(formato_24.format(f"Série original", f"tamanho {len(s)}", f"min {s.min():.1f}", f"max {s.max():.1f}"))
+    print(formato_24.format(f"Média móvel (30)", f"tamanho {len(mm)}", f"min {mm.min():.1f}", f"max {mm.max():.1f}"))
 
     # (c) Médias por minuto (10 leituras de 6 s).
     por_minuto = s.reamostrar(10)

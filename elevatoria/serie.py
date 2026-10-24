@@ -37,7 +37,7 @@ class SerieTemporal(np.ndarray):
 
     def variacao(self) -> SerieTemporal:
         """Diferenças entre pontos consecutivos (`n - 1` valores)."""
-        return np.diff(self)
+        return np.diff(self).view(SerieTemporal)
 
     def amplitude(self) -> float:
         """Máximo menos mínimo da série, como `float`."""
