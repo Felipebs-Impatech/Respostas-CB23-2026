@@ -10,18 +10,6 @@ import unittest
 
 import numpy as np
 
-#from elevatoria import dados
-
-import os
-import sys
-
-# Pega o diretório atual do arquivo e sobe dois níveis (.. / ..)
-caminho = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-if caminho not in sys.path:
-    sys.path.append(caminho)
-
-# Agora podemos importar a pasta normalmente
 from elevatoria import dados
 from elevatoria.serie import SerieTemporal
 
