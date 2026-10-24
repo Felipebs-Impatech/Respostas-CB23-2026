@@ -64,6 +64,7 @@ class TestSerieTemporal(unittest.TestCase):
         esperado = SerieTemporal.de_lista([2.0, 5.0])
         resultado = s.reamostrar(3)
         self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
+
 class TestLerLog(unittest.TestCase):
     """Testes de regressão da issue #1."""
 
@@ -99,7 +100,19 @@ class TestLerLog(unittest.TestCase):
         self.assertEqual(registros[1].valores, {"evento": "partida"})
         self.assertEqual(invalidas, ["2026-10-05 08:00:01 INFO PT101"])
     
+class TestValidaTag(unittest.TestCase):
+    """Testes de regressão da issue #2."""
 
+    def test_valida_tag(self):
+        """Valida tags corretas e rejeita incorretas."""
+        self.assertTrue(valida_tag("PT101"))
+        self.assertTrue(valida_tag("101PT"))
+        self.assertFalse(valida_tag("PT1010"))  # mais de 3 dígitos
+        self.assertFalse(valida_tag("101PT "))  # sobra de caracteres
+    
+    def test_valida_tag_vazia(self):
+        """Valida tag vazia."""
+        self.assertFalse(valida_tag(""))  # tag vazia
 
 if __name__ == "__main__":
     unittest.main()
