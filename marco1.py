@@ -125,9 +125,10 @@ def etapa3() -> None:
     print("-" * 60)
     for estrutura, bytes_totais in memoria.items():
         if estrutura == "list":
-            continue
-        razao = bytes_totais / memoria["list"]
-        print(formato_4.format(estrutura, bytes_totais // n, bytes_totais, f"{razao:.1f}"))
+            razao = 1.0
+        else:
+            razao = bytes_totais / memoria["list"]
+            print(formato_4.format(estrutura, bytes_totais // n, bytes_totais, f"{razao:.3f}"))
 
     assert memoria["uint16"] == 2_000_000
     assert memoria["list"] > 10 * memoria["uint16"]
@@ -139,9 +140,10 @@ def etapa3() -> None:
     print("-" * 60)
     for versao, tempo in tempos.items():
         if versao == "laço":
-            continue
-        aceleracao = tempos["laço"] / tempo
-        print(formato_3.format(versao, f"{tempo * 1000:.3f}", f"{aceleracao:.1f}"))
+            aceleracao = 1.0
+        else:
+            aceleracao = tempos["laço"] / tempo
+            print(formato_3.format(versao, f"{tempo * 1000:.3f}", f"{aceleracao:.1f}"))
 
     assert tempos["laço"] / tempos["vetorizado"] >= 5
 

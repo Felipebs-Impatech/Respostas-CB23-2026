@@ -58,9 +58,9 @@ Previsões registradas no commit: <!-- cole o hash curto do commit de previsões
 
 | Grandeza | Previsão | Medido |
 | --- | --- | --- |
-| Memória da lista / memória do `uint16` |cerca de 18x               | |
-| Tempo do laço / tempo vetorizado       |vetorizado é bem mais veloz| |
-| Tempo da compreensão / tempo do laço   |tempos similares           | |
+| Memória da lista / memória do `uint16` |cerca de 18x               |17,85x |
+| Tempo do laço / tempo vetorizado       |vetorizado é bem mais veloz|25.9x  |
+| Tempo da compreensão / tempo do laço   |tempos similares           |1.1x   |
 
 <!-- Explique a maior diferença entre previsão e medição; por que uint16 * 20 dá 16364; que dtype você escolheria para contagens e para kPa. -->
 
