@@ -38,6 +38,12 @@ class TestSerieTemporal(unittest.TestCase):
         resultado = s.media_movel(3)
         self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
 
+    def test_media_movel_falho(self):
+        """Médias móveis de janela 0 (deve falhar)."""
+        s = SerieTemporal.de_lista([1, 2, 3])
+        with self.assertRaises(ValueError):
+            s.media_movel(0)
+
     def test_variacao(self):
         """Diferenças entre pontos consecutivos."""
         s = SerieTemporal.de_lista([1, 3, 2, 5])
