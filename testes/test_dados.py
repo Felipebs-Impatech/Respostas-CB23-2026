@@ -51,11 +51,18 @@ class TestSerieTemporal(unittest.TestCase):
         resultado = s.variacao()
         self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
 
-    def test_reamostrar(self):
+    def test_reamostrar_1(self):
         """Reamostragem com k=2."""
         s = SerieTemporal.de_lista([1, 2, 3, 4, 5, 6])
         esperado = SerieTemporal.de_lista([1.5, 3.5, 5.5])
         resultado = s.reamostrar(2)
+        self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
+
+    def test_reamostrar_2(self):
+        """Reamostragem com k=3, descartando pontos finais."""
+        s = SerieTemporal.de_lista([1, 2, 3, 4, 5, 6, 7])
+        esperado = SerieTemporal.de_lista([2.0, 5.0])
+        resultado = s.reamostrar(3)
         self.assertTrue(np.allclose(resultado, esperado), f"esperado {esperado}, obtido {resultado}")
 
 if __name__ == "__main__":
