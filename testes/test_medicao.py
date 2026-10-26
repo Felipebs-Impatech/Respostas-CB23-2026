@@ -5,8 +5,22 @@ dizendo qual caso ele cobre, e floats comparados com assertAlmostEqual, math.isc
 np.allclose, a não ser que a igualdade exata seja justamente o que você quer testar.
 """
 import unittest
+from datetime import datetime, timedelta
 
 from elevatoria.acumuladores import AcumuladorIngenuo, AcumuladorKahan
+from elevatoria.medicao import medir
+from elevatoria.calibracao import CurvaCalibracao
+from elevatoria.dados import Registro
+
+
+def registros_pressao(contagens):
+    """Cria registros de pressão com a estrutura esperada por `medir`."""
+    instante = datetime(2026, 1, 1)
+    return [
+        Registro(instante + timedelta(seconds=i), "INFO", "pressao",
+                 {"contagens": contagem})
+        for i, contagem in enumerate(contagens)
+    ]
 
 
 class TestAcumuladorIngenuoExemplo(unittest.TestCase):
@@ -43,6 +57,37 @@ class TestAcumuladorKahan(unittest.TestCase):
         for _ in range(10_000):
             acumulador.adicionar(0.1)
         self.assertAlmostEqual(acumulador.total, 1_000.0, places=12)
+
+class TestMedida(unittest.TestCase):
+    """Testes de medição e tratamento de dados inválidos da issue #6."""
+
+    def test_u_sistematica_negativa(self):
+        """Rejeita incerteza sistemática negativa com registros e curva válidos."""
+        registros = registros_pressao([1000, 2000, 3000])
+        curva = CurvaCalibracao([1000, 2000, 3000], [10, 20, 30], metodo="linear")
+        with self.assertRaises(ValueError):
+            medir(registros, "pressao", curva, u_sistematica=-1.0)
+
+    def test_menos_de_duas_validas(self):
+        """Levanta ValueError quando o filtro robusto deixa apenas uma leitura válida."""
+        registros = registros_pressao([1000, 2000, 3000])
+        curva = CurvaCalibracao([1000, 2000, 3000], [10, 20, 30], metodo="linear")
+        with self.assertRaises(ValueError):
+            medir(registros, "pressao", curva, u_sistematica=1.0, limiar=0.1)
+
+    def test_mad_zero(self):
+        """Levanta ValueError quando todas as leituras são iguais e a MAD é zero."""
+        registros = registros_pressao([2000, 2000, 2000])
+        curva = CurvaCalibracao([1000, 2000, 3000], [10, 20, 30], metodo="linear")
+        with self.assertRaises(ValueError):
+            medir(registros, "pressao", curva)
+
+    def test_contagem_fora_do_dominio_da_curva(self):
+        """Propaga ValueError quando uma contagem está fora do domínio de calibração."""
+        registros = registros_pressao([1000, 2000, 4000])
+        curva = CurvaCalibracao([1000, 2000, 3000], [10, 20, 30], metodo="linear")
+        with self.assertRaises(ValueError):
+            medir(registros, "pressao", curva)
 
 if __name__ == "__main__":
     unittest.main()
