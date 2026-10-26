@@ -61,7 +61,7 @@ def medir(registros: list[Registro], tag: str, curva: CurvaCalibracao,
    for zero ou se sobrarem menos de 2 leituras válidas. Um `ValueError` da curva (contagem
    fora do domínio) não é tratado: ele chega a quem chamou `medir`.
    """
-   contagens = serie(registros, tag)
+   contagens = serie(registros, tag, "contagens")
    if len(contagens) < 2:
        raise ValueError(f"tag {tag!r} tem menos de 2 leituras")
    if u_sistematica < 0:
