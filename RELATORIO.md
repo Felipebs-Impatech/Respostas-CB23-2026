@@ -92,3 +92,30 @@ Isso aconteceu porque o teste não verifica se os valores estão certos, nem se 
 Os testes que implementei em `testes\test_dados.py` cobrem tanto o tamanho da janela quanto os valores que a função retorna, assim garantindo o bom funcionamento da função.
 
 <!-- Sintoma; o teste de regressão (nome); a causa, em termos da soma acumulada; a correção; por que os testes de aceitação não pegaram o defeito; mais um caso que eles não cobrem e qual teste seu o cobre. -->
+
+## Marco 2
+
+### Ambiente
+```bash
+=== Etapa 0: ambiente ===
+Python 3.13.15 | NumPy 2.5.3 | SciPy 1.18.0 | fornecido 4.0 | matrícula 3549
+<!-- Cole a saída da Etapa 0 do `python marco2.py`. -->
+```
+### R8 — Derivada numérica
+
+
+<!-- Com a tabela da Etapa 1(b): por que o erro diminui quando h vai de 1 até cerca de 1e-5 e
+depois volta a crescer? Que tipo de erro domina em cada lado? Por que, em h = 1e-14, o erro
+é exatamente a própria derivada? (Experimente 1000 + 1e-14 == 1000.) -->
+
+### R9 — Issue #7
+
+<!-- Os nomes dos seus testes de regressão; a causa: por que, em ponto flutuante,
+t - (s + y) dá sempre zero, embora seja algebricamente igual a (t - s) - y; por que os testes
+de aceitação não pegaram o defeito. -->
+
+### R10 — Precisão × exatidão
+
+<!-- Na Etapa 3(b), as curvas linear e spline dão praticamente o mesmo desvio, mas viéses bem
+diferentes para PT102. Explique a diferença entre precisão e exatidão com esses números e
+por que a média de quase 600 leituras não elimina o viés da curva linear. -->
